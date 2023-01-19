@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>订阅服务</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css" integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<body>
+
+<form class="pure-form">
+    
+</form>
+
+<div class="pure-g">
+
+    <div class="pure-u-1-3"> </div>
+    
+
+    <form class="pure-form pure-form-stacked" style="margin-top: 100px;" id="subForm">
+        <fieldset>
+            <legend style="font-size: 20px;">活动结束提醒服务订阅</legend>
+            <label for="stacked-email">邮箱</label>
+            <input type="email" id="stacked-email" name="email" placeholder="推荐使用QQ邮箱" />
+            <label for="stacked-nickname">昵称</label>
+            <input type="text" id="stacked-nickname" name="name" placeholder="" />
+            <label for="multi-times">提前通知时间(分钟)</label>
+            <select id="multi-times" name="time">
+                <option>30</option>
+                <option>60</option>
+                <option>120</option>
+                <option>180</option>
+            </select>
+            <a class="pure-button pure-button-primary" id="submitBtn">提交</a>
+            <!-- <button class="pure-button pure-button-primary">提交</button> -->
+            <div id="ServiceInfo"></div>
+            
+            <!-- <p>现已服务次数100，服务人数4</p> -->
+        </fieldset>
+    </form>
+
+    <div class="pure-u-1-3"> </div>
+
+</div>
+<script type="text/javascript">
+
+    url = "http://localhost:8000"
+
+    function showServiceInfo() {
+
+        $.ajax({
+            url: url+"/sum/all",
+            type: "GET",
+            success: function(data) {
+                // all_data = JSON.stringify(data);
+                var all_num = data.num;
+                console.log(all_num);
+                $.ajax({
+                    url: url+"/sum/now",
+                    type: "GET",
+                    success: function(data) {
+                        // now_data = JSON.stringify(data);
+                        var now_num = data.num;
+                        console.log(now_num);
+                        // 追加元素
+                        $("#ServiceInfo").append(
+                            "<legend >总计服务人数"+all_num+"，现有订阅人数"+now_num+"/100</legend>"
+                            )
+                    },
+                    error: function(error) {
+                        var x = JSON.stringify(error);
+                    }
+                });
+
+            },
+            error: function(error) {
+                var x = JSON.stringify(error);
+            }
+        });
+
+    }
+
+    $("#submitBtn").click(function(){
+        let value = $('#subForm').serializeArray();
+        let data = {};
+        $.each(value, function (index, item) {
+            data[item.name] = item.value;
+        });
+        let json = JSON.stringify(data);
+        console.log(json);
+
+        $.ajax({
+            url: url+"/sub/",
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json", // 必须
+            data: json,
+            success: function(data) {
+                console.log(data);
+                swal("订阅成功", "您的邮箱会收到一封邮件用于验证能正常收信", "success");
+                // 跳出提示
+            },
+            error: function(error) {
+                var x = JSON.stringify(error);
+            }
+        });
+    })
+
+    showServiceInfo();
+</script>
+</body>
+</html>
